@@ -1,0 +1,117 @@
+# The party hub — the class and identifier vocabulary that source packages in
+# the Semvia demo quiver align into.
+#
+# WHY A HUB. Alignment between N independently-authored packages is O(N²) if
+# each package aligns to each other package directly: five source packages that
+# all describe organizations need ten bridges, and every new package needs five
+# more. Aligning each package to a hub instead is O(N) — one alignment per
+# package, authored once, and a package added later costs one file and touches
+# nothing that already shipped. The saving is not merely arithmetic: a pairwise
+# bridge COUPLES the two packages it spans, so one side cannot re-version its
+# IRIs without breaking the other, while a hub alignment couples each package
+# only to a vocabulary that is deliberately small and deliberately stable.
+#
+# WHY IT IS THIS SMALL. Every term here is one a source package will align to
+# and a query will read. The hub is not a place to model parties well — it is
+# the narrowest vocabulary that lets two packages meet. A term nothing aligns to
+# is a term that costs rewrite budget at read time and buys nothing, so terms
+# are added when a second package needs them, not in anticipation.
+#
+# WHAT IT DELIBERATELY OMITS. No addresses, no jurisdictions, no relationships,
+# no roles. Those differ enough between sources that a hub term would either be
+# so loose it says nothing or so tight it misrepresents one side. Sources keep
+# their own; a query that needs them reads the source vocabulary directly.
+#
+# House modelling rules this file follows (monorepo CLAUDE.md, "Inference
+# Layer"):
+#   - predicates are bare `rdf:Property` with label + comment, carrying NO
+#     `rdfs:domain` / `rdfs:range`. Those are live typing declarations under
+#     rdfs2/rdfs3 as of #4242, and a hub is the worst possible place to put one:
+#     a range here would type the objects of every aligned source's data.
+#   - no `sh:property` constraints on hub classes. A hub class is reached by
+#     alignment from data the hub does not control and cannot validate — see
+#     the "third-party vocabularies" note in CLAUDE.md. Constraining it would
+#     turn another package's ordinary data into violations in this one.
+
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix svs:   <https://pkg.semvia.io/semvia/core/meta-schema#> .
+@prefix svds:  <https://pkg.semvia.io/semvia/core/dataset#> .
+@prefix party: <#> .
+
+<> a svs:Schema ;
+  dct:title "Party"@en ;
+  dct:description "Classes and canonical identifiers for organizations and people, as an alignment target. The hub of the demo quiver's hub-and-spoke alignment topology."@en ;
+  svds:imports <https://pkg.semvia.io/semvia/core/meta-schema> ;
+  sh:declare [
+    a sh:PrefixDeclaration ;
+    sh:prefix "party" ;
+    sh:namespace party:
+  ] ;
+.
+
+################################################################
+# Classes
+################################################################
+
+# The top of the hub lattice. Named `Party` rather than `Agent` — `Agent` is the
+# RDF-conventional term (FOAF), but in this organization it reads as "AI agent"
+# on first encounter, and a hub term is read far more often than it is written.
+#
+# A Party is anything that can hold an identifier and enter a relationship: a
+# company, a person, a fund, a government body. It is deliberately broader than
+# any single source's top class, because it has to sit above all of them.
+party:Party a rdfs:Class ;
+  rdfs:label "Party"@en ;
+  rdfs:comment "An organization or a person — anything that can be identified and can hold a relationship to another party. The alignment target a source package's top-level actor class points at."@en ;
+.
+
+# NOT `owl:equivalentClass foaf:Organization` or `org:FormalOrganization`, and
+# not `rdfs:subClassOf` either. Both are adopt-as-DEPENDENCY moves, and the
+# discriminator is deployment: nobody's data in this quiver is minted with FOAF
+# or W3C ORG IRIs, so importing them would buy interoperability with no actual
+# corpus while adding a vocabulary to every install. They are adopted as
+# INFLUENCE — this class means what `foaf:Organization` means, and a consumer
+# who needs the edge asserts it in their own workspace, where it costs only them.
+party:Organization a rdfs:Class ;
+  rdfs:subClassOf party:Party ;
+  rdfs:label "Organization"@en ;
+  rdfs:comment "A party that is not a natural person: a company, a fund, a government body, a nonprofit, a branch. Deliberately does not distinguish among these — a source that draws the distinction keeps its own subclasses and aligns them here."@en ;
+.
+
+party:Person a rdfs:Class ;
+  rdfs:subClassOf party:Party ;
+  rdfs:label "Person"@en ;
+  rdfs:comment "A natural person."@en ;
+.
+
+################################################################
+# Canonical identifiers
+################################################################
+#
+# These are the hub's real work, and the reason it dissolves bridges rather than
+# merely relocating them. Two packages that both carry the LEI do not need to
+# know about each other AT ALL once both align their LEI predicate to
+# `party:lei`: `owl:equivalentProperty` is walked in both directions at read
+# time (#4986), so one pattern on `party:lei` reaches both datasets, and the
+# join key is a value both sources already publish rather than a mapping table
+# somebody has to maintain.
+#
+# The test for admitting an identifier here is whether it is issued by a
+# STANDARDS BODY rather than by one of the sources. An LEI is ISO 17442 and
+# every LEI holder has the same one everywhere; a vendor's internal customer id
+# is not, and putting one here would make the hub a party to one source's
+# namespace.
+
+party:lei a rdf:Property ;
+  rdfs:label "LEI"@en ;
+  rdfs:comment "The ISO 17442 Legal Entity Identifier, as the twenty-character literal the issuer publishes — not as an IRI and not as a reified identifier object. The canonical join key between any two packages that carry it."@en ;
+.
+
+party:name a rdf:Property ;
+  rdfs:label "name"@en ;
+  rdfs:comment "A name the party is known by. Deliberately loose: it is the union target that a source's registered-legal-name, trading-name and transliteration predicates all align UP into via rdfs:subPropertyOf, so that one pattern surfaces every name without asserting that any of them is the legal one. A source that needs the legal name specifically reads its own predicate."@en ;
+.

@@ -1,0 +1,11 @@
+{
+  "@context": "https://pkg.semvia.io/semvia/core/semantic-package",
+  "@type": "https://pkg.semvia.io/semvia/core/semantic-package#SemanticPackage",
+  "title": "Party",
+  "description": "The domain hub for parties — organizations and people — in the Semvia demo quiver. Ships no data and no mappings: it declares a small set of classes and canonical identifiers that source packages align INTO, so that N packages need N alignments rather than N(N-1)/2 pairwise bridges. Installing it makes independently-authored packages answer one another's queries without either naming the other's IRIs.",
+  "version": "0.1.0",
+  "owner": "SemviaIO",
+  "baseIRI": "https://github.com/SemviaIO/party",
+  "source": "./schema",
+  "built": "./built"
+}

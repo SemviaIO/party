@@ -1,0 +1,22 @@
+Attribution
+===========
+
+This package contains no data and no mappings. It is a vocabulary: a handful of
+classes and two canonical identifier predicates that other packages align into.
+
+Nothing here is derived from a third-party vocabulary. The classes are
+deliberately NAMED after well-known terms — `Organization` and `Person` mean
+what FOAF, schema.org and W3C ORG mean by those words — but no third-party
+definition is copied, imported, or redistributed, and installing this package
+pulls in no external file. The resemblance is adoption as influence, not as
+dependency: a consumer who wants `foaf:Organization owl:equivalentClass
+party:Organization` asserts that edge in their own workspace, where it costs
+only them.
+
+"LEI" refers to the ISO 17442 Legal Entity Identifier and to the Global LEI
+System operated by GLEIF. This package names the identifier; it redistributes no
+LEI data and is not affiliated with, endorsed by, or produced in cooperation
+with GLEIF or ISO.
+
+Everything in this repository is dedicated to the public domain under CC0 1.0
+Universal. See LICENSE.
