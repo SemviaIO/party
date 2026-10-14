@@ -42,11 +42,24 @@ Terms are added when a **second** package needs them — never in anticipation.
 
 ## Install
 
+Paste `https://pkg.semvia.io/semvia/party/@0.2.0` into Folio's dependency
+drawer, or from a workspace:
+
+```sh
+sem add https://pkg.semvia.io/semvia/party/@0.2.0
+```
+
+Either records the requirement in `sem.json`:
+
 ```json
 {
-  "requires": {
-    "https://github.com/SemviaIO/party": "SemviaIO/party#v0.1.0"
-  }
+  "requires": [
+    {
+      "@type": "https://pkg.semvia.io/semvia/core/semantic-package#PackageRequirement",
+      "package": "https://pkg.semvia.io/semvia/party/",
+      "versionMinimum": "0.2.0"
+    }
+  ]
 }
 ```
 
@@ -58,7 +71,7 @@ true — usually `rdfs:subClassOf`, not `owl:equivalentClass`, since a source's
 top class is rarely coextensive with the hub's:
 
 ```turtle
-@prefix party: <https://github.com/SemviaIO/party/ontology#> .
+@prefix party: <https://pkg.semvia.io/semvia/party/ontology#> .
 
 yours:LegalEntity   rdfs:subClassOf       party:Organization .
 yours:lei           owl:equivalentProperty party:lei .
